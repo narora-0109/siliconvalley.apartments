@@ -1,6 +1,6 @@
 class UsersController < ApplicationController
   skip_before_action :verify_authenticity_token, except: [:create]
-  before_action :authorize, only:[:index]
+  before_action :authorize, only:[:index, :edit, :update]
 
   def index
     #@listings = Listing.where(:user_id => session[:id])
