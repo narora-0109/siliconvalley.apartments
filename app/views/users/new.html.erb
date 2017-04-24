@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <title>ApartmentSearch</title>
+  <meta name="generator" content="Bootply"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+  <%= stylesheet_link_tag "custom.css" %>
+</head>
+<body>
+<div class="navbar navbar-custom navbar-fixed-top">
+  <div class="navbar-header"><a class="navbar-brand" href="/listings/index">SiliconValley.Apartments</a>
+    <a class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </a>
+  </div>
+  <li class="navbar-collapse collapse">
+    <ul class="nav navbar-nav">
+      <li class="active"><a href="/listings/new">Add a Listing</a></li>
+      <li><a href="/users">Manage Listings</a></li>
+    </ul>
+</div>
+</div>
+<div class="container">
+  <h1> Create New Account </h1>
+  <% if @user.errors.any? %>
+      <div id="error_explanation">
+
+          <% @user.errors.messages.each do |attribute,msg| %>
+              <% msg.each do |m|%>
+                <p style="color: rgb(255,0,0);"><b><%= "#{attribute} - #{m}"  %></b></p>
+              <% end %>
+          <% end %>
+      </div>
+  <%end%>
+
+    <%= simple_form_for @user, as: :user, url: '/signup', :method => :post  do |f| %>
+        <div class="field">
+          <%= f.label :name, 'Username' %><br />
+          <%= f.text_field :name %>
+        </div>
+        <br />
+        <div class="field">
+          <%= f.label :phoneNum, 'Phone Number' %><br />
+          <%= f.text_field :phoneNum %>
+        </div>
+        <br />
+        <br />
+        <div class="field">
+          <%= f.label :email, 'Email Address' %><br />
+          <%= f.text_field :email %>
+        </div>
+        <br />
+
+        <div class="field">
+          <%= f.label :password, 'Enter Password' %><br />
+          <%= f.password_field :password %>
+        </div>
+        <br />
+        <div class="field">
+          <%= f.label :password_confirmation, 'Retype Password' %><br />
+          <%= f.password_field :password_confirmation %>
+        </div>
+        <br />
+        <div class="actions"><%= f.submit "Sign Up" %></div>
+
+    <% end %>
+  </div>
+</body>
+</html>
+
+
