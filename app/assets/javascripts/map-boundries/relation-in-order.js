@@ -126,5 +126,5 @@ function getRelationInOrder(relationID, callback, params) {
  * @param {String} relationID ID of the relation to retrieve
  */
 function getOSMRelationURL(relationID) {
-	return "http://overpass-api.de/api/interpreter?data=[out:json];(relation(" + relationID + ");>;);out;";
+	return "https://overpass-api.de/api/interpreter?data=[out:json];(relation(" + relationID + ");>;);out;";
 }

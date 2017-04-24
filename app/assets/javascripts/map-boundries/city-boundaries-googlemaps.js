@@ -102,7 +102,7 @@ function initialize() {
  * @param {String} stateName Name of the state to retrieve the area for
  */
 function getOSMAreaForCityURL(cityName, stateName) {
-	return "http://overpass-api.de/api/interpreter?data=[out:json];area[name=%22" + cityName + 
+	return "https://overpass-api.de/api/interpreter?data=[out:json];area[name=%22" + cityName +
 		"%22][%22is_in:state_code%22=%22" + stateName + "%22];foreach(out;);node[name=%22" + cityName + 
 		"%22][%22is_in%22~%22" + stateName + "%22];foreach(out;is_in;out;);";
 	// case insensitive, really slow!
@@ -119,7 +119,7 @@ function getOSMAreaForCityURL(cityName, stateName) {
  * @param {String} relationID ID of the relation to retrieve
  */
 function getOSMCityRelationURL(relationID) {
-	return "http://overpass-api.de/api/interpreter?data=[out:json];(relation(" + relationID + ");>;);out;";
+	return "https://overpass-api.de/api/interpreter?data=[out:json];(relation(" + relationID + ");>;);out;";
 }
 
 /**
