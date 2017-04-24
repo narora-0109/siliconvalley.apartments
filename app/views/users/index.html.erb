@@ -54,10 +54,10 @@
                   </div>
                 </div>
                 <div>
-                  <h4><span class="fa fa-map-marker icon"></span> <%=listing.streetnum%> <%=listing.streetname.camelize%>, <%=listing.city.camelize%>, <%=listing.state.upcase%><%=listing.zipcode%></h4>
+                  <h4><span class="fa fa-map-marker icon"></span> <%=listing.streetnum%> <%=listing.streetname.camelize%>, <%=listing.city.camelize%>, <%=listing.state.upcase%>, <%=listing.zipcode%></h4>
                   Pets Allowed? - <%=listing.pets%>
-                  <span class="fa fa-edit icon pull-right"> <%= link_to "update", listings_update_path(:id => listing.id) %></span>
                   <span class="fa fa-remove icon pull-right"> <%= link_to "delete", listings_delete_path(:id => listing.id) %></span>
+                  <span class="fa fa-edit icon pull-right"> <%= link_to "update", listings_update_path(:id => listing.id) %></span>
                 </div>
               </div>
             </div>
@@ -89,7 +89,7 @@
   }
 
   .icon {
-    font-size:23px;
+    font-size:20px;
     color:#197BB5;
   }
 </style>
