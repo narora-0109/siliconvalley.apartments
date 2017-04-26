@@ -10,6 +10,8 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCn08ZfcJ6WvhUEzB-SUICMYcFxrEF6-V8&libraries=places&callback=initAutocomplete" async defer> </script>
+  <!--script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/4.3.0/dropzone.js"></script-->
+  <!--link href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/4.3.0/dropzone.css" rel="stylesheet"-->
   <script>
       var placeSearch, autocomplete;
       var componentForm = {
@@ -51,7 +53,7 @@
           for (var i = 0; i < place.address_components.length; i++) {
               var addressType = place.address_components[i].types[0];
               // debugger;
-              if ((componentForm[addressType]) && addressType === "locality") {
+              /*if ((componentForm[addressType]) && addressType === "locality") {
                   var val = place.address_components[i][componentForm[addressType]];
                   var el = document.getElementById("listing_city");
                   for(var j=0; j<el.options.length; j++) {
@@ -61,10 +63,11 @@
                       }
                   }
               }
-              else if (componentForm[addressType]) {
+              else if (componentForm[addressType]) {*/
                   var val = place.address_components[i][componentForm[addressType]];
-                  document.getElementById(addressType).value = val;
-              }
+                  if (typeof val !== 'undefined')
+                    document.getElementById(addressType).value = val;
+              //}
           }
       }
 
@@ -135,7 +138,7 @@
     </div>
 
 
-<%= simple_form_for @listing, as: :listing, url: '/listings/create', wrapper: :inline_form, html: { class: 'form-inline', :multipart => true } do |f| %>
+<%= simple_form_for @listing, as: :listing, url: '/listings/create', wrapper: :inline_form, html: { class: 'form-inline dropzone', :multipart => true } do |f| %>
       <div class='row'>
           <div class='col-sm-3'>
             <div class='form-group'>
@@ -146,68 +149,6 @@
             </div>
           </div>
 
-          <div class='col-sm-3'>
-            <div class='form-group'>
-              <div class="field">
-                <%= f.label :streetnum, 'Street Number' %><br />
-                <%= f.text_field :streetnum, id: 'street_number' %>
-              </div>
-            </div>
-          </div>
-      </div>
-
-      <div class='row'>
-        <div class='col-sm-3'>
-          <div class='form-group'>
-            <div class="field">
-              <%= f.label :streetname, 'Street Name' %><br />
-              <%= f.text_field :streetname, id: 'route' %>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class='row'>
-        <div class='col-sm-3'>
-          <div class='form-group'>
-            <div class="field">
-              <%= f.label :city, 'City'%><br/>
-              <%= f.select :city, ['Fremont','Emeryville','Palo Alto','Daly City','Mountain View','Cupertino','Sunnyvale','Berkeley','Oakland','Dublin','Newark ','Pleasanton','Danville','Walnut Creek','Union City','San Leandro','San Jose','Milpitas','Redwood City','San Francisco','San Mateo','Santa Clara'], id: 'locality' %>
-            </div>
-          </div>
-        </div>
-
-          <div class='col-sm-3'>
-            <div class='form-group'>
-              <div class="field">
-                <%= f.label :zipcode, 'Zipcode' %><br />
-                <%= f.text_field :zipcode, id: 'postal_code' %>
-              </div>
-            </div>
-          </div>
-      </div>
-
-      <div class='row'>
-        <div class='col-sm-3'>
-          <div class='form-group'>
-            <div class="field">
-              <%= f.label :state, 'State' %><br/>
-              <%= f.text_field :state, id: 'administrative_area_level_1' %>
-            </div>
-          </div>
-        </div>
-
-        <div class='col-sm-3'>
-          <div class='form-group'>
-            <div class="field">
-              <%= f.label :country, 'Country' %><br/>
-              <%= f.text_field :country, id: 'country' %>
-            </div>
-          </div>
-        </div>
-      </div>
-
-
       <div class='row' style="padding: 10px;">
         <div class='col-sm-12'></div>
       </div>
@@ -215,7 +156,7 @@
         <%= f.label :pictures, 'Property Images' %><br>
         <%= f.file_field :pictures, multiple: true %>
       </div>
-
+ßß
 
       <div class='row' style="padding: 10px;">
         <div class='col-sm-12'>
@@ -296,6 +237,12 @@
 
       <%= f.hidden_field :latitude %>
       <%= f.hidden_field :longitude %>
+      <%= f.hidden_field :streetnum, id: 'street_number' %>
+      <%= f.hidden_field :streetname, id: 'route' %>
+      <%= f.hidden_field :city, id: 'locality' %>
+      <%= f.hidden_field :zipcode, id: 'postal_code' %>
+      <%= f.hidden_field :state, id: 'administrative_area_level_1' %>
+      <%= f.hidden_field :country, id: 'country' %>
 
       <div class='row'>
         <div class='col-sm-12'>
