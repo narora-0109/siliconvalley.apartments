@@ -86,7 +86,11 @@
       if ($.trim(searchBox).length == 0) {
           $.get("https://ipinfo.io", function (response) {
               $.get("https://freegeoip.net/json/"+response.ip, function(geoResponse) {
-                  city = geoResponse.city + ", " +geoResponse.region_code;
+                  if (geoResponse.city.length == 0) {
+                      city = geoResponse.region_code;
+                  } else {
+                      city = geoResponse.city + ", " + geoResponse.region_code;
+                  }
                   if (typeof city === 'undefined' || city.length == 0) {
                       city = "San Francisco, ca";
                   }

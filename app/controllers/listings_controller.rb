@@ -41,11 +41,10 @@ class ListingsController < ApplicationController
   end
 
   def update
-    #TODO - check that listing belongs to loggedin user before updating it
     if (params[:id].present?)
-      @listing = Listing.find(params[:id])
+      @listing = Listing.left_outer_joins(:pictures).where(:id => params[:id])
     else
-      @listing = Listing.find(params[:listing][:id])
+      @listing = Listing.find_by(id: params[:listing][:id])
       if @listing.update_attributes(listing_params)
         redirect_to '/users'
       else
@@ -54,10 +53,11 @@ class ListingsController < ApplicationController
     end
   end
 
+
   private
 
   def listing_params
-    params.require(:listing).permit(:unit_num,:streetnum,:streetname,:city,:state,:country,:zipcode,:price,:latitude,:longitude,:property_desc,:property_type, :sq_ft,:bedrooms, :bathrooms, :pets,:leasing_fees, :picture_json)
+    params.require(:listing).permit(:unit_num,:streetnum,:streetname,:city,:state,:country,:zipcode,:price,:latitude,:longitude,:property_desc,:property_type, :sq_ft,:bedrooms, :bathrooms, :pets,:leasing_fees)
   end
 
 end

@@ -3,8 +3,8 @@ class UsersController < ApplicationController
   before_action :authorize, only:[:index, :edit, :update]
 
   def index
-    #@listings = Listing.where(:user_id => session[:id])
-    @listings = Listing.joins(:pictures).where(:user_id => session[:id]).where("pictures.listing_id = listings.id")
+    @listings = Listing.where(:user_id => session[:id])
+    @listings.as_json
   end
 
   def show

@@ -8,16 +8,19 @@ Rails.application.routes.draw do
 
   get '/listings/show', to: 'listings#show'
   get '/listings/delete/:id', to: 'listings#delete'
-  get 'listings/new'
-  post 'listings/create'
-  get 'listings/index'
-  get 'listings/update'
-  patch 'listings/update'
+  get '/listings/new'
+  post '/listings/create'
+  get '/listings/index'
+  get '/listings/update'
+  patch '/listings/update'
+  post '/listings/update'
 
   get 'users/edit'
   patch 'users/edit', to: 'users#update'
 
   get 'users/login'
+
+  get '/pictures/delete/:id', to: 'pictures#destroy'
 
   resources :users do
     member do
