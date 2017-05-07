@@ -46,6 +46,9 @@ class ListingsController < ApplicationController
     else
       @listing = Listing.find_by(id: params[:listing][:id])
       if @listing.update_attributes(listing_params)
+        params[:listing]['pictures'].each do |file|
+          @listing.pictures.create!(:picture_json => file)
+          end
         redirect_to '/users'
       else
         render 'update'
@@ -57,7 +60,7 @@ class ListingsController < ApplicationController
   private
 
   def listing_params
-    params.require(:listing).permit(:unit_num,:streetnum,:streetname,:city,:state,:country,:zipcode,:price,:latitude,:longitude,:property_desc,:property_type, :sq_ft,:bedrooms, :bathrooms, :pets,:leasing_fees)
+    params.require(:listing).permit(:unit_num,:streetnum,:streetname,:city,:state,:country,:zipcode,:price,:latitude,:longitude,:property_desc,:property_type, :sq_ft,:bedrooms, :bathrooms, :pets,:leasing_fees, :picture_json)
   end
 
 end
