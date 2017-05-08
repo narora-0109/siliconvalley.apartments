@@ -10,30 +10,35 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170422200515) do
+ActiveRecord::Schema.define(version: 20170508010723) do
+
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "plpgsql"
+  enable_extension "postgis"
 
   create_table "listings", force: :cascade do |t|
-    t.float    "price"
-    t.string   "streetname"
-    t.string   "city"
-    t.string   "zipcode"
-    t.datetime "created_at",    null: false
-    t.datetime "updated_at",    null: false
-    t.string   "status"
-    t.string   "latitude"
-    t.string   "longitude"
-    t.integer  "streetnum"
-    t.string   "country"
-    t.string   "state"
-    t.text     "property_desc"
-    t.string   "property_type"
-    t.integer  "sq_ft"
-    t.integer  "bedrooms"
-    t.integer  "bathrooms"
-    t.string   "pets"
-    t.string   "leasing_fees"
-    t.integer  "unit_num"
-    t.integer  "user_id"
+    t.float     "price"
+    t.string    "streetname"
+    t.string    "city"
+    t.string    "zipcode"
+    t.datetime  "created_at",                                                                null: false
+    t.datetime  "updated_at",                                                                null: false
+    t.string    "status"
+    t.string    "latitude"
+    t.string    "longitude"
+    t.integer   "streetnum"
+    t.string    "country"
+    t.string    "state"
+    t.text      "property_desc"
+    t.string    "property_type"
+    t.integer   "sq_ft"
+    t.integer   "bedrooms"
+    t.integer   "bathrooms"
+    t.string    "pets"
+    t.string    "leasing_fees"
+    t.integer   "unit_num"
+    t.integer   "user_id"
+    t.geography "coordinates",   limit: {:srid=>4326, :type=>"st_point", :geographic=>true}
   end
 
   create_table "pictures", force: :cascade do |t|
@@ -41,7 +46,7 @@ ActiveRecord::Schema.define(version: 20170422200515) do
     t.datetime "updated_at",   null: false
     t.integer  "listing_id"
     t.string   "picture_json"
-    t.index ["listing_id"], name: "index_pictures_on_listing_id"
+    t.index ["listing_id"], name: "index_pictures_on_listing_id", using: :btree
   end
 
   create_table "users", force: :cascade do |t|
@@ -55,8 +60,8 @@ ActiveRecord::Schema.define(version: 20170422200515) do
     t.string   "confirm_token"
     t.string   "reset_digest"
     t.datetime "reset_sent_at"
-    t.index ["email"], name: "index_users_on_email", unique: true
-    t.index ["name"], name: "index_users_on_name", unique: true
+    t.index ["email"], name: "index_users_on_email", unique: true, using: :btree
+    t.index ["name"], name: "index_users_on_name", unique: true, using: :btree
   end
 
 end

@@ -17,6 +17,8 @@ class ListingsController < ApplicationController
 
   def create
     @listing = Listing.new(listing_params)
+    @listing.coordinates = RGeo::Geographic.spherical_factory(srid: 4326).point(@listing.longitude, @listing.latitude)
+
     @listing.user_id = session[:id]
       if @listing.save
         params[:listing]['pictures'].each do |file|
@@ -48,7 +50,7 @@ class ListingsController < ApplicationController
       if @listing.update_attributes(listing_params)
         params[:listing]['pictures'].each do |file|
           @listing.pictures.create!(:picture_json => file)
-          end
+        end
         redirect_to '/users'
       else
         render 'update'

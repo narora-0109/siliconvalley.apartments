@@ -1,5 +1,13 @@
 class Listing < ApplicationRecord
 
+  #GEO_FACTORY = RGeo::Geographic.spherical_factory(:srid => 4326)
+  #set_rgeo_factory_for_column :coordinates, GEO_FACTORY
+
+  #geocoded_by :address do |record, results|
+    #result = results.first
+    #record.coordinates = GEO_FACTORY.point(result.latitude, result.longitude)
+  #end
+
   validates :price, presence: true
   before_save :downcase_fields
 

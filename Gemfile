@@ -16,7 +16,7 @@ group :production do
 end
 
 group :development, :test do
-  gem 'sqlite3'
+  gem 'pg'
 end
 
 gem 'rails_12factor'
@@ -75,3 +75,9 @@ gem 'figaro'
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
+
+gem 'rgeo'
+gem 'rgeo-activerecord'
+
+gem 'activerecord-postgis-adapter'
+

@@ -5,16 +5,20 @@
 #   gem 'sqlite3'
 #
 development:
-  adapter: sqlite3
-  encoding: utf8
+  adapter: postgis
+  encoding: unicode
   database: myapp_development
   pool: 5
+  postgis_extension: postgis
+  schema_search_path: public,postgis
 
 test:
-  adapter: sqlite3
-  encoding: utf8
+  adapter: postgis
+  encoding: unicode
   database: myapp_test
   pool: 5
+  postgis_extension: postgis
+  schema_search_path: public,postgis
 
 production:
   adapter: pg
