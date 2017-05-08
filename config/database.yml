@@ -24,6 +24,7 @@ production:
   adapter: postgis
   encoding: unicode
   database: pg_production
+  url: <%= ENV.fetch('DATABASE_URL', '').sub(/^postgres/, "postgis") %>
   pool: 5
   postgis_extension: postgis
   schema_search_path: public,postgis
