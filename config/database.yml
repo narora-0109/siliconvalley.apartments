@@ -21,7 +21,9 @@ test:
   schema_search_path: public,postgis
 
 production:
-  adapter: pg
-  encoding: utf8
+  adapter: postgis
+  encoding: unicode
   database: pg_production
   pool: 5
+  postgis_extension: postgis
+  schema_search_path: public,postgis
