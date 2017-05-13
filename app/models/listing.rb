@@ -18,12 +18,17 @@ class Listing < ApplicationRecord
 
   def self.by_city(city)
     return all unless city.present?
-    where(:city => city)
+    where(:city => city.downcase)
+  end
+
+  def self.by_coordinates(coordinates)
+    return all unless coordinates.present?
+    where("ST_Intersects(coordinates, ?)", "POLYGON(("+coordinates+"))")
   end
 
   def self.by_state(state)
     return all unless state.present?
-    where(:state => state)
+    where(:state => state.downcase)
   end
 
   def self.by_bedrooms(rooms)
@@ -33,7 +38,7 @@ class Listing < ApplicationRecord
 
   def self.by_pets(pets)
     return all unless pets.present?
-    where(:pets => pets)
+    where(:pets => pets.downcase)
   end
 
   def self.by_bathroom(bathrooms)
@@ -81,7 +86,7 @@ class Listing < ApplicationRecord
   end
 
   def as_json()
-    super(:only => [:id, :price,:unit_num, :streetnum,:streetname,:city,:state, :country,:zipcode,:latitude,:longitude,:status,:property_desc,:property_type,:sq_ft,:bedrooms, :bathrooms, :pets,:leasing_fees],
+    super(:only => [:id, :price,:unit_num, :streetnum,:streetname,:city,:state, :country,:zipcode,:latitude,:longitude,:status,:property_desc,:property_type,:sq_ft,:bedrooms, :bathrooms, :pets,:leasing_fees, :coordinates],
           :include => {
               :pictures =>{:only => [:picture_json]}
           }

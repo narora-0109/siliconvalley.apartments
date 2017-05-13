@@ -87,7 +87,6 @@ function initialize() {
 	setUpAjax();
 	
 	var mapOptions = {
-		zoom : 4,
 		center : new google.maps.LatLng(37.09024, -95.712891),
 		streetViewControl : false,
 		mapTypeId : google.maps.MapTypeId.ROADMAP

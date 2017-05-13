@@ -7,7 +7,11 @@ class ListingsController < ApplicationController
   end
 
   def show
-    @listings = Listing.by_city(params[:city].downcase).by_state(params[:state].downcase).by_bathroom(params[:bathrooms]).by_price(params[:min_price], params[:max_price]).by_bedrooms(params[:bedrooms]).by_pets(params[:pets].downcase)
+    #if params[:coordinates].present?
+      @listings = Listing.by_coordinates(params[:coordinates]).by_city(params[:city]).by_state(params[:state]).by_bathroom(params[:bathrooms]).by_price(params[:min_price], params[:max_price]).by_bedrooms(params[:bedrooms]).by_pets(params[:pets])
+    #else
+      #@listings = Listing.by_city(params[:city].downcase).by_state(params[:state].downcase).by_bathroom(params[:bathrooms]).by_price(params[:min_price], params[:max_price]).by_bedrooms(params[:bedrooms]).by_pets(params[:pets].downcase)
+    #end
     render :json => @listings.as_json
   end
 

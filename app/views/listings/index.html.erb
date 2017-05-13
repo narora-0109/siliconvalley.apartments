@@ -37,6 +37,8 @@
 
   var activeNow;
 
+  var has_map_clicked_upon = false;
+
   // initialize orange marker image
   var orangePinColor = "FF4500";
   var orangePinImage = new google.maps.MarkerImage("https://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|" + orangePinColor,
@@ -59,24 +61,39 @@
       $("#filter_btn").click(function () {
           search();
           $('#filter_trigger_btn').click();
+          has_map_clicked_upon=false;
       });
 
       $("#search").keyup(function(event){
           if(event.keyCode == 13){
               $("#search_btn_trigger").click();
+              has_map_clicked_upon=false;
           }
       });
   });
 
 
-  function search() {
+  function updateListingUsingMapBounds() {
+
+      var bounds = map.getBounds();
+      var NECorner = bounds.getNorthEast();
+      var SWCorner = bounds.getSouthWest();
+      var NWCorner = new google.maps.LatLng(NECorner.lat(), SWCorner.lng());
+      var SECorner = new google.maps.LatLng(SWCorner.lat(), NECorner.lng());
+
+      search(NECorner.lng() +" "+ NECorner.lat()+","+SECorner.lng() +" "+ SECorner.lat()+","+SWCorner.lng() +" "+ SWCorner.lat()+","+NWCorner.lng() +" "+ NWCorner.lat()+","+NECorner.lng() +" "+ NECorner.lat())
+  }
+
+
+  function search(coordinates) {
     var max_price = $("#max-price").val();
     var min_price = $("#min-price").val();
     var rooms = $("#rooms").val();
     var bathrooms = $("#bathrooms").val();
     var pets = $("#pets").val();
     var city_state = $("#search").val();
-    getListings(city_state, max_price, min_price, rooms, bathrooms, pets);
+    getListings(city_state, max_price, min_price, rooms, bathrooms, pets, coordinates);
+    //has_map_clicked_upon=false;
     return false;
   }
 
@@ -95,19 +112,21 @@
                       city = "San Francisco, ca";
                   }
                   getListings(city);
-
+                  //has_map_clicked_upon = false;
               })
 
           }, "jsonp");
       } else {
           getListings(searchBox);
+          //has_map_clicked_upon = false;
       }
-
   }
 
-  function getListings(city, max_price, min_price, bedrooms, bathrooms, pets) {
+
+
+  function getListings(city, max_price, min_price, bedrooms, bathrooms, pets, coordinates) {
       activeNow = undefined;
-      markers = [];
+      //markers = [];
       if (typeof city === 'undefined' || city.length == 0) {
           city = "San Francisco, ca";
       }
@@ -132,12 +151,20 @@
           pets = "Yes";
       }
 
-      $.getJSON('/listings/show?city='+city.split(',')[0]+"&state="+city.split(', ')[1]+"&pets="+pets+"&bathrooms="+bathrooms+
-              "&bedrooms="+bedrooms+"&max_price="+max_price+"&min_price="+min_price
-          , function (json) {
+      var show_url;
+      if (typeof coordinates!=='undefined') {
+          show_url = "/listings/show?pets=" + pets + "&bathrooms=" + bathrooms +
+              "&bedrooms=" + bedrooms + "&max_price=" + max_price + "&min_price=" + min_price + "&coordinates=" + coordinates
+      } else {
+          show_url = '/listings/show?city=' + city.split(',')[0] + "&state=" + city.split(', ')[1] + "&pets=" + pets + "&bathrooms=" + bathrooms +
+              "&bedrooms=" + bedrooms + "&max_price=" + max_price + "&min_price=" + min_price
+      }
+
+      $.getJSON(show_url, function (json) {
 
           // creating deep copy of returned jsonq
           properties = JSON.parse(JSON.stringify(json));
+
 
           var template = $('#properties-listing').html();
           var context = {
@@ -147,9 +174,11 @@
               return parseInt(value) + 1;
           });
 
-          map = new google.maps.Map(document.getElementById('map-canvas'), {
-              mapTypeId: google.maps.MapTypeId.ROADMAP
-          });
+          if (typeof coordinates === 'undefined') {
+              map = new google.maps.Map(document.getElementById('map-canvas'), {
+                  mapTypeId: google.maps.MapTypeId.ROADMAP
+              });
+          }
 
 
           // markers will be shown on map for these coordinates
@@ -162,6 +191,12 @@
           $('#property-list ul').empty();
           $('#property-list ul').append(html);
 
+
+          //Loop through all the markers and remove
+          for (var i = 0; i < markers.length; i++) {
+              markers[i].setMap(null);
+          }
+          markers = [];
 
           properties.forEach(function (property, index) {
               // to begin with all markers will be in orange color
@@ -209,6 +244,7 @@
               markers.push(marker);
               bounds.extend(marker.position);
           });
+          if (typeof coordinates === 'undefined') {
           // position the map so that all markers are visible (only when search box is not empty)
           map.fitBounds(bounds);
 
@@ -233,17 +269,55 @@
                           }
                       })
                   }
+
                   map.fitBounds(results[0].geometry.viewport);
               });
           }
 
-          loadCityLimits();
+
+               loadCityLimits();
+           }
+
+          map.dragInProgress = false; //adding flag to already existing map object to keep DOM clean
+          google.maps.event.addListener(map, 'dragend', function() {
+
+              if(map.dragInProgress == false && has_map_clicked_upon == true) { //only first shall pass
+                  map.dragInProgress = true;
+                  window.setTimeout(function() {
+                      updateListingUsingMapBounds();
+                      map.dragInProgress = false; //reset the flag for next drag
+                  }, 700);
+              }
+          });
+
+          map.dragInProgress = false; //adding flag to already existing map object to keep DOM clean
+          google.maps.event.addListener(map, 'zoom_changed', function() {
+              if(map.dragInProgress == false && has_map_clicked_upon == true) { //only first shall pass
+                  map.dragInProgress = true;
+                  window.setTimeout(function() {
+                      updateListingUsingMapBounds();
+                      map.dragInProgress = false; //reset the flag for next drag
+                  }, 700);
+              }
+          });
+
+          google.maps.event.addListener(map, 'click', function() {
+              has_map_clicked_upon = true;
+
+              // clear city limits
+              while (allOverlays[0]) {
+                  allOverlays.pop().setMap(null);
+              }
+
+              updateListingUsingMapBounds();
+          });
 
       });
   }
 
   // call initialize method to load map on window load
   google.maps.event.addDomListener(window, "load", initialize);
+
 
   // called when mouse goes on or out of a property in the property list
   showme = function (index) {
