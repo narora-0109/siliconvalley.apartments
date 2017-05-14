@@ -39,6 +39,12 @@
 
   var has_map_clicked_upon = false;
 
+  var is_polygon_draw_mode = false;
+
+  var clickListener;
+  var drawing_polygon=false;
+
+
   // initialize orange marker image
   var orangePinColor = "FF4500";
   var orangePinImage = new google.maps.MarkerImage("https://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|" + orangePinColor,
@@ -59,15 +65,17 @@
 
   $(function() {
       $("#filter_btn").click(function () {
+          has_map_clicked_upon=false;
           search();
           $('#filter_trigger_btn').click();
-          has_map_clicked_upon=false;
+          //has_map_clicked_upon=false;
       });
 
       $("#search").keyup(function(event){
           if(event.keyCode == 13){
-              $("#search_btn_trigger").click();
               has_map_clicked_upon=false;
+              $("#search_btn_trigger").click();
+              //has_map_clicked_upon=false;
           }
       });
   });
@@ -93,7 +101,8 @@
     var pets = $("#pets").val();
     var city_state = $("#search").val();
     getListings(city_state, max_price, min_price, rooms, bathrooms, pets, coordinates);
-    //has_map_clicked_upon=false;
+    if (typeof coordinates === 'undefined')
+      has_map_clicked_upon=false;
     return false;
   }
 
@@ -112,14 +121,25 @@
                       city = "San Francisco, ca";
                   }
                   getListings(city);
-                  //has_map_clicked_upon = false;
               })
 
           }, "jsonp");
       } else {
           getListings(searchBox);
-          //has_map_clicked_upon = false;
       }
+
+
+  }
+
+  function polygonButton(){
+      var btn = $('<div class="polygon-button"><br /><button>Draw Region</button></div>');
+      btn.bind('click', function(){
+          is_polygon_draw_mode = !is_polygon_draw_mode;
+          map.setOptions({draggable: !is_polygon_draw_mode});
+
+
+      });
+      return btn[0];
   }
 
 
@@ -273,14 +293,13 @@
                   map.fitBounds(results[0].geometry.viewport);
               });
           }
-
+              map.controls[google.maps.ControlPosition.TOP_RIGHT].push(polygonButton());
 
                loadCityLimits();
            }
 
           map.dragInProgress = false; //adding flag to already existing map object to keep DOM clean
           google.maps.event.addListener(map, 'dragend', function() {
-
               if(map.dragInProgress == false && has_map_clicked_upon == true) { //only first shall pass
                   map.dragInProgress = true;
                   window.setTimeout(function() {
@@ -289,6 +308,7 @@
                   }, 700);
               }
           });
+
 
           map.dragInProgress = false; //adding flag to already existing map object to keep DOM clean
           google.maps.event.addListener(map, 'zoom_changed', function() {
@@ -301,16 +321,90 @@
               }
           });
 
-          google.maps.event.addListener(map, 'click', function() {
+          if (typeof clickListener !== 'undefined')
+              google.maps.event.removeListener(clickListener);
+
+          clickListener = google.maps.event.addListenerOnce(map, 'click', function() {
+
+
+              if (drawing_polygon) {
+                  drawing_polygon = false;
+                  return;
+              }
               has_map_clicked_upon = true;
+
+
 
               // clear city limits
               while (allOverlays[0]) {
                   allOverlays.pop().setMap(null);
               }
-
-              updateListingUsingMapBounds();
+              window.setTimeout(function() {
+                updateListingUsingMapBounds();
+              }, 700);
           });
+
+
+          /*google.maps.event.addDomListener(map.getDiv(),'mousedown',function(e){
+
+
+              //do it with the right mouse-button only
+              if(e.button!=0)
+              {
+                  return;
+              }
+
+
+
+
+              if (typeof poly !== 'undefined') {
+                  while(poly.getPath().length) {
+                      poly.getPath().pop();
+                  }
+              }
+
+              if (!is_polygon_draw_mode) {
+                  return;
+              }
+
+              drawing_polygon=true;
+
+              map.setOptions({draggable: false});
+
+              poly=new google.maps.Polyline({map:map,clickable:false});
+              //move-listener
+              var move=google.maps.event.addListener(map,'mousemove',function(e){
+                  if (is_polygon_draw_mode) {
+                      poly.getPath().push(e.latLng);
+                  }
+              });
+              //mouseup-listener
+              google.maps.event.addListenerOnce(map,'mouseup',function(e){
+
+                  if (!is_polygon_draw_mode) {
+                      return;
+                  }
+
+                  is_polygon_draw_mode = false;
+
+                  drawing_polygon=true;
+                  has_map_clicked_upon = false;
+
+                  google.maps.event.removeListener(move);
+                  var path=poly.getPath();
+
+                  poly=new google.maps.Polygon({map:map,path:path});
+                  map.setOptions({draggable: true});
+
+
+
+
+              });
+
+
+
+          });*/
+
 
       });
   }
