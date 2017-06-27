@@ -14,4 +14,5 @@ Rails.application.config.assets.precompile += %w( map-boundries/relation-in-orde
 Rails.application.config.assets.precompile += %w( map-boundries/utility-functions.js )
 Rails.application.config.assets.precompile += %w( map-boundries/google.maps.Polygon.getBounds.js )
 Rails.application.config.assets.precompile += %w( map-boundries/city-boundaries-googlemaps.js )
+Rails.application.config.assets.precompile += %w( GDouglasPeuker.js )
 Rails.application.config.assets.precompile += %w( custom.css )

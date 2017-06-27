@@ -26,7 +26,7 @@
   <%= javascript_include_tag "map-boundries/utility-functions.js" %>
   <%= javascript_include_tag "map-boundries/google.maps.Polygon.getBounds.js" %>
   <%= javascript_include_tag "map-boundries/city-boundaries-googlemaps.js" %>
-
+  <%= javascript_include_tag "GDouglasPeuker.js" %>
   <%= stylesheet_link_tag "custom.css" %>
 
   <script type='text/javascript'>//<![CDATA[
@@ -39,10 +39,10 @@
 
   var has_map_clicked_upon = false;
 
-  var is_polygon_draw_mode = false;
-
   var clickListener;
-  var drawing_polygon=false;
+
+  var poly;
+
 
 
   // initialize orange marker image
@@ -61,9 +61,17 @@
 
   var properties = [];
 
-
+  var control = document.createElement('div');
+  control.innerHTML = "Draw Search Area";
+  control.style.background = "#168ccc";
+  control.style.color = "white";
+  control.style.margin = "10px";
+  control.style.padding = "10px";
+  control.style.cursor = "pointer";
+  control.style.cursor = "hand";
 
   $(function() {
+
       $("#filter_btn").click(function () {
           has_map_clicked_upon=false;
           search();
@@ -131,16 +139,11 @@
 
   }
 
-  function polygonButton(){
-      var btn = $('<div class="polygon-button"><br /><button>Draw Region</button></div>');
-      btn.bind('click', function(){
-          is_polygon_draw_mode = !is_polygon_draw_mode;
-          map.setOptions({draggable: !is_polygon_draw_mode});
+  var polygonButtonClicked = false;
+  var polygonDrawEnded = true;
+  var polygonDrawBegun = false;
+  var polygonButtonEnabled = true;
 
-
-      });
-      return btn[0];
-  }
 
 
 
@@ -197,6 +200,38 @@
           if (typeof coordinates === 'undefined') {
               map = new google.maps.Map(document.getElementById('map-canvas'), {
                   mapTypeId: google.maps.MapTypeId.ROADMAP
+              });
+              google.maps.event.addDomListener(control, 'click', function() {
+                  if (!polygonButtonEnabled) {
+                      polygonDrawEnded = true;
+                      map.setOptions({draggable: polygonDrawEnded});
+                      polygonButtonEnabled = !polygonButtonEnabled;
+                      polygonDrawBegun = false;
+                      control.innerHTML = "Draw Search Area";
+                      return;
+                  }
+
+                  if (typeof poly !== 'undefined') {
+                     while(poly.getPath().length) {
+                         poly.getPath().pop();
+                     }
+                     poly.getPaths().length=0;
+                     poly.getPath().length=0;
+                     poly.setMap(null);
+                  }
+
+
+                  polygonButtonClicked = !polygonButtonClicked;
+
+                  polygonButtonClicked ? control.innerHTML = "Clear Search Area" : control.innerHTML = "Draw Search Area";
+
+                  polygonButtonClicked ? control.style.display = "none" : control.style.display = "block";
+
+
+                  map.setOptions({draggable: !polygonButtonClicked});
+
+                  polygonDrawEnded = polygonButtonClicked ? false : true;
+
               });
           }
 
@@ -293,7 +328,8 @@
                   map.fitBounds(results[0].geometry.viewport);
               });
           }
-              map.controls[google.maps.ControlPosition.TOP_RIGHT].push(polygonButton());
+              control.index = 1;
+              map.controls[google.maps.ControlPosition.TOP_RIGHT].push(control);
 
                loadCityLimits();
            }
@@ -327,10 +363,6 @@
           clickListener = google.maps.event.addListenerOnce(map, 'click', function() {
 
 
-              if (drawing_polygon) {
-                  drawing_polygon = false;
-                  return;
-              }
               has_map_clicked_upon = true;
 
 
@@ -345,7 +377,8 @@
           });
 
 
-          /*google.maps.event.addDomListener(map.getDiv(),'mousedown',function(e){
+          google.maps.event.addDomListener(map.getDiv(),'mousedown',function(e){
+
 
 
               //do it with the right mouse-button only
@@ -354,41 +387,49 @@
                   return;
               }
 
+              if (!polygonButtonClicked || polygonDrawEnded) {
+                  return;
+              }
 
 
+              if (polygonButtonEnabled) {
+
+                  polygonDrawBegun = true;
+                  polygonButtonEnabled = false;
+
+              }
+
+
+
+              map.setOptions({draggable: false});
 
               if (typeof poly !== 'undefined') {
                   while(poly.getPath().length) {
                       poly.getPath().pop();
                   }
+                  poly.getPath().length=0;
+                  poly.setMap(null);
               }
 
-              if (!is_polygon_draw_mode) {
-                  return;
-              }
-
-              drawing_polygon=true;
-
-              map.setOptions({draggable: false});
 
               poly=new google.maps.Polyline({map:map,clickable:false});
               //move-listener
+              var previousLatLng;
               var move=google.maps.event.addListener(map,'mousemove',function(e){
-                  if (is_polygon_draw_mode) {
+                      if(!polygonButtonClicked || polygonDrawEnded || !polygonDrawBegun) {
+                          return;
+                      }
+                      control.style.display = "none";
                       poly.getPath().push(e.latLng);
-                  }
+                      previousLatLng = e.latLng;
               });
               //mouseup-listener
               google.maps.event.addListenerOnce(map,'mouseup',function(e){
 
-                  if (!is_polygon_draw_mode) {
-                      return;
-                  }
+                 if (!polygonButtonClicked || polygonDrawEnded || !polygonDrawBegun) {
+                     return;
+                 }
 
-                  is_polygon_draw_mode = false;
-
-                  drawing_polygon=true;
-                  has_map_clicked_upon = false;
 
                   google.maps.event.removeListener(move);
                   var path=poly.getPath();
@@ -396,14 +437,30 @@
                   poly=new google.maps.Polygon({map:map,path:path});
                   map.setOptions({draggable: true});
 
+                  polygonDrawEnded = true;
+                  polygonDrawBegun = false;
+
+                  control.style.display = "block";
 
 
+                  for(i=0; i<poly.getPath().length;i++) {
+                      vertices = poly.getPath(i);
+                      var contentString = "";
+                      for (var i=0; i < vertices.getLength(); i++) {
+                          var xy = vertices.getAt(i);
+                          contentString += '<br>' + 'Coordinate ' + i + ':<br>' + xy.lat() + ',' +
+                              xy.lng();
+                      }
+                      console.log(contentString);
+                  }
+
+                  polygonButtonEnabled = true;
 
               });
 
 
 
-          });*/
+          });
 
 
       });
